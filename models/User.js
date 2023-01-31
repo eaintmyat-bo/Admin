@@ -38,11 +38,24 @@ const userSchema = new Schema({
       },
     },
   ],
+  location: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      required: true,
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+    },
+  },
   //created at will be default based on time of transaction
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
+
+userSchema.index({ location: "2dsphere" });
 
 module.exports = mongoose.model("User", userSchema);

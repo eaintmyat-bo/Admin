@@ -18,6 +18,10 @@ exports.signup = (req, res) => {
     dob: req.body.dob,
     address: req.body.address,
     description: req.body.description,
+    location: {
+      type: req.body.location.type,
+      coordinates: req.body.location.coordinates,
+    },
   });
 
   user.save((err, user) => {

@@ -8,6 +8,7 @@ const {
   deleteUser,
   followUser,
   unfollowUser,
+  getNearbyFriends,
 } = require("../services/UserService.js");
 
 const router = express.Router();
@@ -79,6 +80,20 @@ router.put("/unfollow/:followId", [authJwt.verifyToken], async (req, res) => {
       res.status(error.statusCode).json({ message: error.message });
     } else {
       res.status(500).json({ message: "Error unfollowing user" });
+    }
+  }
+});
+
+router.get("/user/friends", [authJwt.verifyToken], async (req, res) => {
+  try {
+    //req.userId is from header
+    let users = await getNearbyFriends(req.userId);
+    res.status(200).json({ data: users, message: "success!" });
+  } catch (error) {
+    if (error.statusCode) {
+      res.status(error.statusCode).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "Error retreiving friends" });
     }
   }
 });

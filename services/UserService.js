@@ -22,8 +22,19 @@ exports.followUser = (bearerId, followId) => {
     try {
       let user = await UserModel.findById(bearerId);
 
+      //sanity check
+      if (!user) {
+        const error = new Error("User not found");
+        error.statusCode = 400;
+        throw error;
+      }
+
       //if this is the new user to follow, save in the following list
-      if (!user.following.some((followingId) => followingId.equals(followId))) {
+      if (
+        user.following &&
+        user.following.length > 0 &&
+        !user.following.some((followingId) => followingId.equals(followId))
+      ) {
         user.following.push(followId);
         await user.save();
 
@@ -49,8 +60,18 @@ exports.unfollowUser = (bearerId, followId) => {
     try {
       let user = await UserModel.findById(bearerId);
 
+      //sanity check
+      if (!user) {
+        const error = new Error("User not found");
+        error.statusCode = 400;
+        throw error;
+      }
       //if this is the new user to follow, save in the following list
-      if (user.following.some((followingId) => followingId.equals(followId))) {
+      if (
+        user.following &&
+        user.following.length > 0 &&
+        user.following.some((followingId) => followingId.equals(followId))
+      ) {
         user.following = user.following.filter(
           (following) => !following.equals(followId)
         );
@@ -67,6 +88,40 @@ exports.unfollowUser = (bearerId, followId) => {
         error.statusCode = 400;
         throw error;
       }
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
+  });
+};
+
+//add following in bearerId user, add follower in the followId user
+exports.getNearbyFriends = (bearerId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let user = await UserModel.findById(bearerId);
+      //sanity check
+      if (!user) {
+        const error = new Error("User not found");
+        error.statusCode = 400;
+        throw error;
+      }
+
+      // Find users who are within a specified distance from the user's location
+      let nearbyUsers = await UserModel.find({
+        location: {
+          $near: {
+            $geometry: user.location,
+            $maxDistance: 900000, //in meters, can be configured accordingly
+            $minDistance: 10,
+          },
+        },
+      });
+
+      if (nearbyUsers) {
+        nearbyUsers = nearbyUsers.filter((user) => !user.equals(bearerId));
+      }
+      resolve(nearbyUsers);
     } catch (error) {
       console.log(error);
       reject(error);
