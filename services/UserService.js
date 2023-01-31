@@ -21,9 +21,10 @@ exports.followUser = (bearerId, followId) => {
   return new Promise(async (resolve, reject) => {
     try {
       let user = await UserModel.findById(bearerId);
+      let followedUser = await UserModel.findById(followId);
 
       //sanity check
-      if (!user) {
+      if (!user || !followedUser) {
         const error = new Error("User not found");
         error.statusCode = 400;
         throw error;
@@ -38,7 +39,6 @@ exports.followUser = (bearerId, followId) => {
         user.following.push(followId);
         await user.save();
 
-        let followedUser = await UserModel.findById(followId);
         followedUser.followers.push(bearerId);
         await followedUser.save();
         resolve(user);
@@ -59,9 +59,10 @@ exports.unfollowUser = (bearerId, followId) => {
   return new Promise(async (resolve, reject) => {
     try {
       let user = await UserModel.findById(bearerId);
+      let followedUser = await UserModel.findById(followId);
 
       //sanity check
-      if (!user) {
+      if (!user || !followedUser) {
         const error = new Error("User not found");
         error.statusCode = 400;
         throw error;
@@ -77,7 +78,6 @@ exports.unfollowUser = (bearerId, followId) => {
         );
         user = await user.save();
 
-        let followedUser = await UserModel.findById(followId);
         followedUser.followers = followedUser.followers.filter(
           (follower) => !follower.equals(bearerId)
         );

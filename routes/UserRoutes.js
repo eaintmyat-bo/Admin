@@ -24,6 +24,7 @@ router.get("/", [authJwt.verifyToken, authJwt.isAdmin], async (req, res) => {
   }
 });
 
+//user can view him/her own details only
 router.get("/:id", [authJwt.verifyToken], async (req, res) => {
   try {
     let user = await getUserById(req.params.id);
@@ -34,6 +35,7 @@ router.get("/:id", [authJwt.verifyToken], async (req, res) => {
   }
 });
 
+//user can delete him/her own details only
 router.delete("/:id", [authJwt.verifyToken], async (req, res) => {
   try {
     let user = await deleteUser(req.params.id);
@@ -44,6 +46,7 @@ router.delete("/:id", [authJwt.verifyToken], async (req, res) => {
   }
 });
 
+//user can update him/her own details only
 router.put("/:id", [authJwt.verifyToken], async (req, res) => {
   try {
     let user = await updateUser(req.params.id, req.body);
@@ -54,7 +57,7 @@ router.put("/:id", [authJwt.verifyToken], async (req, res) => {
   }
 });
 
-//for user to follow another user
+// user to follow another user
 router.put("/follow/:followId", [authJwt.verifyToken], async (req, res) => {
   try {
     //req.userId is from header
