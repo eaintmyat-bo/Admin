@@ -10,7 +10,16 @@ const {
 
 const router = express.Router();
 
-router.route("/").get(getAllUsers);
+//only allows admin to retrieve all users
+router.get("/", [authJwt.verifyToken, authJwt.isAdmin], async (req, res) => {
+  try {
+    let users = await getAllUsers();
+    res.json({ status: "sucess", data: users });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 router.get("/:id", [authJwt.verifyToken], async (req, res) => {
   try {
@@ -18,7 +27,7 @@ router.get("/:id", [authJwt.verifyToken], async (req, res) => {
     res.json({ status: "sucess", data: user });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -28,7 +37,7 @@ router.delete("/:id", [authJwt.verifyToken], async (req, res) => {
     res.json({ status: "sucess", data: user });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -38,7 +47,7 @@ router.put("/:id", [authJwt.verifyToken], async (req, res) => {
     res.json({ status: "sucess", data: user });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
