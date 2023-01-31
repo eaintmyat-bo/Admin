@@ -5,6 +5,10 @@ const Role = require("../models/Role");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
+/*
+  input data to create a new user (signing up)
+  further validations can be done in the future to check req body
+*/
 exports.signup = (req, res) => {
   const user = new User({
     username: req.body.username,
@@ -22,6 +26,7 @@ exports.signup = (req, res) => {
       return;
     }
 
+    //if role has been mentioned, will be saved as mentioned else default will be user
     if (req.body.roles) {
       Role.find(
         {
@@ -92,6 +97,7 @@ exports.signin = (req, res) => {
         });
       }
 
+      //secret key can be replaced with more secure token (this is for simplication)
       var token = jwt.sign({ id: user.id }, "secretkey", {
         expiresIn: 86400, // 24 hours
       });
