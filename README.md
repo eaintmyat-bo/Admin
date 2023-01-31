@@ -25,7 +25,7 @@ npm run start
 ```
 
 ## Usage
-You can use your own mongodb to link to the app. E.g. as below:
+You can create your own credential file and add mongodb to link to the app for security reasonsE.g. as below:
 
 `"dburl": "mongodb+srv://<username>:<password>@usercluster.teqxcgz.mongodb.net/?retryWrites=true&w=majority"`
 
