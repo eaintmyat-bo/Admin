@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Role = require("../models/Role");
 
+//to verify if the authorised token is correct
 verifyToken = (req, res, next) => {
   let token = req.headers["x-access-token"];
 
@@ -18,6 +19,7 @@ verifyToken = (req, res, next) => {
   });
 };
 
+//check if the token bearer is admin to perform admin checks
 isAdmin = (req, res, next) => {
   User.findById(req.userId).exec((err, user) => {
     if (err) {
