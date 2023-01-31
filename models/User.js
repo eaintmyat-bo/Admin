@@ -22,6 +22,22 @@ const userSchema = new Schema({
     type: String,
     default: "default description",
   },
+  following: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    },
+  ],
+  followers: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    },
+  ],
   //created at will be default based on time of transaction
   createdAt: {
     type: Date,

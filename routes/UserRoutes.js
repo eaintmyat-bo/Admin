@@ -6,6 +6,8 @@ const {
   getUserById,
   updateUser,
   deleteUser,
+  followUser,
+  unfollowUser,
 } = require("../services/UserService.js");
 
 const router = express.Router();
@@ -48,6 +50,36 @@ router.put("/:id", [authJwt.verifyToken], async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+//for user to follow another user
+router.put("/follow/:followId", [authJwt.verifyToken], async (req, res) => {
+  try {
+    //req.userId is from header
+    let user = await followUser(req.userId, req.params.followId);
+    res.status(200).json({ data: user, message: "Followed user!" });
+  } catch (error) {
+    if (error.statusCode) {
+      res.status(error.statusCode).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "Error following user" });
+    }
+  }
+});
+
+//for user to unfollow another user
+router.put("/unfollow/:followId", [authJwt.verifyToken], async (req, res) => {
+  try {
+    //req.userId is from header
+    let user = await unfollowUser(req.userId, req.params.followId);
+    res.status(200).json({ data: user, message: "Unfollowed user!" });
+  } catch (error) {
+    if (error.statusCode) {
+      res.status(error.statusCode).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "Error unfollowing user" });
+    }
   }
 });
 
