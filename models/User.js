@@ -4,7 +4,10 @@ const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
   username: String,
-  email: String,
+  email: {
+    type: String,
+    unqiue: true, //email must be unique
+  },
   password: String,
   roles: [
     {
@@ -15,7 +18,10 @@ const userSchema = new Schema({
   name: String,
   dob: Date,
   address: String,
-  description: String,
+  description: {
+    type: String,
+    default: "default description",
+  },
   //created at will be default based on time of transaction
   createdAt: {
     type: Date,
