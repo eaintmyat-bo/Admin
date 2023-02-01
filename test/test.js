@@ -121,4 +121,10 @@ describe("User service tests", () => {
       ).not.toContain(createdUserId2);
     });
   });
+
+  afterAll((done) => {
+    // Closing the DB connection allows Jest to exit successfully.
+    mongoose.connection.close();
+    done();
+  });
 });
