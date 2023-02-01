@@ -1,125 +1,124 @@
-const User = require("../models/User");
-const chai = require("chai");
-const chaiHttp = require("chai-http");
-const app = require("../app");
-chai.should();
+const UserModel = require("../models/User");
+const userService = require("../services/userService");
+const mongoose = require("mongoose");
+const credentials = require("../credentials/config.json");
 
-chai.use(chaiHttp);
+jest.setTimeout(60000);
 
-/*
-  unit tests for CRUD
-  tests could be further improved with  failed test cases
-*/
-describe("User", () => {
-  describe("/GET user", () => {
-    it("it should GET all the users", (done) => {
-      chai
-        .request(app)
-        .get("/api/users")
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.data.should.be.a("array");
-          done();
-        });
+describe("User service tests", () => {
+  // create a mock user for testing
+  const mockUser = {
+    username: "usertest1",
+    email: "user_test_1@gmail.com",
+    password: "ABCD1234",
+    name: "normal user",
+    dob: "1995-09-01",
+    address: "somewhere",
+    description: "description of user test 1",
+    location: {
+      type: "Point",
+      coordinates: [103.930216, 1.3239765],
+    },
+  };
+
+  const mockUser2 = {
+    username: "usertest2",
+    email: "user_test_2@gmail.com",
+    password: "ABCD1234",
+    name: "normal user",
+    dob: "1995-09-01",
+    address: "somewhere",
+    description: "description of user test 2",
+    location: {
+      type: "Point",
+      coordinates: [104.930216, 1.3249765],
+    },
+  };
+  2;
+
+  let createdUserId;
+  let createdUserId2;
+
+  beforeEach(async () => {
+    //Configure db connection
+    mongoose.connect(
+      //e.g: mongodb+srv://<username>:<password>@usercluster.teqxcgz.mongodb.net/?retryWrites=true&w=majority
+      credentials.dburl,
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      },
+      (err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("Connected to MongoDB");
+        }
+      }
+    );
+    // insert the mock user into the database before each test
+    const createdUser = await UserModel.create(mockUser);
+    createdUserId = createdUser._id;
+    const createdUser2 = await UserModel.create(mockUser2);
+    createdUserId2 = createdUser2._id;
+  });
+
+  afterEach(async () => {
+    // delete the mock user from the database after each test
+    await UserModel.deleteOne({ _id: createdUserId });
+    await UserModel.deleteOne({ _id: createdUserId2 });
+  });
+
+  it("getAllUsers", async () => {
+    const allUsers = await userService.getAllUsers();
+    expect(allUsers).toBeTruthy();
+    expect(allUsers.length).toBeGreaterThan(0);
+  });
+
+  it("should return the user by id", async () => {
+    const user = await userService.getUserById(createdUserId);
+    expect(user).toBeDefined();
+    expect(user.username).toEqual(mockUser.username);
+  });
+
+  describe("updateUser", () => {
+    it("should update the user by id", async () => {
+      const updatedUser = await userService.updateUser(createdUserId, {
+        name: "User1 Updated",
+      });
+      expect(updatedUser).toBeDefined();
+      const userupdated = await userService.getUserById(createdUserId);
+      expect(userupdated.name).toEqual("User1 Updated");
     });
   });
 
-  describe("/POST user", () => {
-    it("it should POST a new user", (done) => {
-      let user = {
-        id: "2",
-        name: "jennie",
-        dob: "1995-07-01",
-        address: "central, singapore",
-        description: "creating second user",
-      };
-      chai
-        .request(app)
-        .post("/api/users")
-        .send(user)
-        .end(async (err, res) => {
-          res.should.have.status(200);
-          res.body.data.should.be.a("object");
-          res.body.status.should.be.eql("success");
-          await User.findByIdAndDelete(res.body.data._id);
-          done();
-        });
+  describe("deleteUser", () => {
+    it("should delete the user by id", async () => {
+      await userService.deleteUser(createdUserId);
+      const user = await UserModel.findById(createdUserId);
+      expect(user).toBeNull();
     });
   });
 
-  describe("/GET/:id user", () => {
-    it("it should GET a user by the id", (done) => {
-      let user = new User({
-        id: "2",
-        name: "jennie",
-        dob: "1995-07-01",
-        address: "central, singapore",
-        description: "second user",
-      });
-      user.save((err, user) => {
-        chai
-          .request(app)
-          .get("/api/users/" + user.id)
-          .send(user)
-          .end(async (err, res) => {
-            res.should.have.status(200);
-            res.body.data.should.be.a("object");
-            res.body.status.should.be.eql("success");
-            await User.findByIdAndDelete(res.body.data._id);
-            done();
-          });
-      });
+  describe("followUser", () => {
+    it("should add the followId user to the bearerId user's following list", async () => {
+      const user = await userService.followUser(createdUserId, createdUserId2);
+      expect(user.following[0]._id).toEqual(createdUserId2);
     });
   });
 
-  describe("/PUT/:id user", () => {
-    it("it should UPDATE a user given the id", (done) => {
-      let user = new User({
-        id: "2",
-        name: "jennie",
-        dob: "1995-07-01",
-        address: "central, singapore",
-        description: "second user from put",
-      });
-      user.save((err, user) => {
-        console.log(user.id);
-        chai
-          .request(app)
-          .put("/api/users/" + user.id)
-          .send({
-            description: "second user updated",
-          })
-          .end(async (err, res) => {
-            res.should.have.status(200);
-            res.body.data.should.be.a("object");
-            res.body.status.should.be.eql("success");
-            await User.findByIdAndDelete(res.body.data._id);
-            done();
-          });
-      });
-    });
-  });
-
-  describe("/DELETE/:id user", () => {
-    it("it should DELETE a user given the id", (done) => {
-      let user = new User({
-        id: "2",
-        name: "jennie",
-        dob: "1995-07-01",
-        address: "central, singapore",
-        description: "second user",
-      });
-      user.save((err, user) => {
-        chai
-          .request(app)
-          .delete("/api/users/" + user.id)
-          .end((err, res) => {
-            res.should.have.status(200);
-            res.body.data.should.be.a("object");
-            res.body.status.should.be.eql("success");
-            done();
-          });
-      });
+  describe("unfollowUser", () => {
+    it("should remove the followId user from the bearerId user's following list", async () => {
+      await userService.followUser(createdUserId, createdUserId2);
+      const unfollowedUser = await userService.unfollowUser(
+        createdUserId,
+        createdUserId2
+      );
+      expect(
+        unfollowedUser.following.some((followingId) =>
+          followingId.equals(followId)
+        )
+      ).not.toContain(createdUserId2);
     });
   });
 });
