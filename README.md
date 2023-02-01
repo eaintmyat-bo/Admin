@@ -22,12 +22,15 @@ This application is written in NODEJS framework using MONGODB for the following 
 ```bash
 npm install
 npm run start
+jest test (for unit test)
 ```
 
 ## Usage
 You can create your own credential file and add mongodb to link to the app for security reasonsE.g. as below:
 
 `"dburl": "mongodb+srv://<username>:<password>@usercluster.teqxcgz.mongodb.net/?retryWrites=true&w=majority"`
+
+Please remove node_modules folder and run npm install again if error occurs.
 
 ## Future Improvements
 1. Add more roles to perform more operations
