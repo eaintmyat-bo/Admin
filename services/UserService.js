@@ -32,9 +32,10 @@ exports.followUser = (bearerId, followId) => {
 
       //if this is the new user to follow, save in the following list
       if (
-        user.following &&
-        user.following.length > 0 &&
-        !user.following.some((followingId) => followingId.equals(followId))
+        user.following.length == 0 ||
+        (user.following &&
+          user.following.length > 0 &&
+          !user.following.some((followingId) => followingId.equals(followId)))
       ) {
         user.following.push(followId);
         await user.save();
